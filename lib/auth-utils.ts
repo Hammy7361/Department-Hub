@@ -4,14 +4,14 @@ import { createServerSupabaseClient } from "./supabase"
 import crypto from "crypto"
 
 // Hash password using SHA-256 with salt
-export function hashPassword(password: string): string {
+export async function hashPassword(password: string): Promise<string> {
   const salt = crypto.randomBytes(16).toString("hex")
   const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex")
   return `${salt}:${hash}`
 }
 
 // Verify password against stored hash
-export function verifyPassword(password: string, hashedPassword: string): boolean {
+export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
   const [salt, storedHash] = hashedPassword.split(":")
   const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex")
   return storedHash === hash
@@ -48,7 +48,7 @@ export async function authenticateUser(email: string, password: string) {
     }
 
     // Verify password for regular users
-    const isValidPassword = verifyPassword(password, user.password_hash)
+    const isValidPassword = await verifyPassword(password, user.password_hash)
 
     if (!isValidPassword) {
       return { success: false, message: "Invalid email or password" }
@@ -81,7 +81,7 @@ export async function createRegistrationRequest(userData: {
 
   try {
     // Hash the password
-    const passwordHash = hashPassword(userData.password)
+    const passwordHash = await hashPassword(userData.password)
 
     // Check if email already exists in users table
     const { data: existingUser } = await supabase.from("users").select("id").eq("email", userData.email).single()

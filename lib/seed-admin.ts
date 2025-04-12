@@ -17,7 +17,7 @@ export async function seedAdminUser() {
 
     // Create admin user with special password
     const ADMIN_PASSWORD = "]tY~J%y-\\zhQOW(Zj0*h"
-    const passwordHash = hashPassword(ADMIN_PASSWORD)
+    const passwordHash = await hashPassword(ADMIN_PASSWORD)
 
     const { error } = await supabase.from("users").insert({
       name: "System Administrator",
