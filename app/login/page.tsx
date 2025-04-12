@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { authenticateUser } from "@/lib/auth-utils"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -19,10 +20,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-
-  // Admin credentials
-  const ADMIN_USERNAME = "admin"
-  const ADMIN_PASSWORD = "]tY~J%y-\\zhQOW(Zj0*h"
 
   // Check for remembered login on component mount
   useEffect(() => {
@@ -36,8 +33,9 @@ export default function LoginPage() {
         // Auto login if we have a remembered session
         if (localStorage.getItem("persistentLogin") === "true") {
           // Don't auto-login for admin, always require password for security
-          if (userData.email !== ADMIN_USERNAME) {
-            handleLogin(userData.email)
+          if (userData.email !== "admin") {
+            // We can't auto-login with the new system since we need password verification
+            // Just pre-fill the email field
           }
         }
       } catch (error) {
@@ -47,32 +45,14 @@ export default function LoginPage() {
     }
   }, [router])
 
-  const handleLogin = (userEmail: string, isAdmin = false) => {
-    // Determine role based on email or admin status
-    let role = "associate"
-
-    if (isAdmin) {
-      role = "admin"
-    } else if (userEmail === "Shanehawley2191@hotmail.com") {
-      role = "manager"
-    }
-
-    // Store login state
-    localStorage.setItem("isLoggedIn", "true")
-    localStorage.setItem("userRole", role)
-    localStorage.setItem("userEmail", userEmail)
-
-    // Redirect to dashboard
-    router.push("/dashboard")
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Check for admin login
-    if (email === ADMIN_USERNAME) {
-      if (password === ADMIN_PASSWORD) {
+    try {
+      const result = await authenticateUser(email, password)
+
+      if (result.success && result.user) {
         // Handle remember me functionality
         if (rememberMe) {
           localStorage.setItem("rememberedUser", JSON.stringify({ email }))
@@ -82,37 +62,31 @@ export default function LoginPage() {
           localStorage.removeItem("persistentLogin")
         }
 
-        // Admin login successful
-        setTimeout(() => {
-          handleLogin(email, true)
-          setIsLoading(false)
-        }, 1000)
+        // Store user info in localStorage for client-side access
+        localStorage.setItem("isLoggedIn", "true")
+        localStorage.setItem("userRole", result.user.role)
+        localStorage.setItem("userEmail", result.user.email)
+        localStorage.setItem("userId", result.user.id)
+        localStorage.setItem("userName", result.user.name)
+
+        // Redirect to dashboard
+        router.push("/dashboard")
       } else {
-        // Admin password incorrect
-        setTimeout(() => {
-          toast({
-            title: "Login Failed",
-            description: "Invalid username or password. Please try again.",
-            variant: "destructive",
-          })
-          setIsLoading(false)
-        }, 1000)
+        toast({
+          title: "Login Failed",
+          description: result.message || "Invalid username or password. Please try again.",
+          variant: "destructive",
+        })
       }
-    } else {
-      // Regular user login (in a real app, you would authenticate with a server)
-      setTimeout(() => {
-        // Handle remember me functionality
-        if (rememberMe) {
-          localStorage.setItem("rememberedUser", JSON.stringify({ email }))
-          localStorage.setItem("persistentLogin", "true")
-        } else {
-          localStorage.removeItem("rememberedUser")
-          localStorage.removeItem("persistentLogin")
-        }
-
-        handleLogin(email)
-        setIsLoading(false)
-      }, 1000)
+    } catch (error) {
+      console.error("Login error:", error)
+      toast({
+        title: "Login Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 

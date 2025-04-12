@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Clock, ArrowLeft } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { createRegistrationRequest } from "@/lib/auth-utils"
 
 export default function RegisterPage() {
   const [name, setName] = useState("")
@@ -38,16 +39,38 @@ export default function RegisterPage() {
       return
     }
 
-    // In a real app, you would send this data to your server
-    // For demo purposes, we'll simulate account creation
-    setTimeout(() => {
-      toast({
-        title: "Account Created",
-        description: "Your account has been created successfully. Please wait for admin approval.",
+    try {
+      const result = await createRegistrationRequest({
+        name,
+        email,
+        password,
+        department,
+        phone,
       })
+
+      if (result.success) {
+        toast({
+          title: "Account Request Submitted",
+          description: "Your account request has been submitted. Please wait for admin approval.",
+        })
+        router.push("/login")
+      } else {
+        toast({
+          title: "Registration Failed",
+          description: result.message || "Failed to create account request.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Registration error:", error)
+      toast({
+        title: "Registration Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
       setIsLoading(false)
-      router.push("/login")
-    }, 1500)
+    }
   }
 
   return (

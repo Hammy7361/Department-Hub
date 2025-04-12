@@ -9,37 +9,24 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
 import { Search, CheckCircle, XCircle } from "lucide-react"
+import { createClientSupabaseClient } from "@/lib/supabase"
+import { approveRegistrationRequest, rejectRegistrationRequest } from "@/lib/auth-utils"
 
-// Mock pending account requests
-export const mockPendingAccounts = [
-  {
-    id: "req001",
-    name: "Michael Johnson",
-    email: "michael.johnson@example.com",
-    department: "Sales",
-    requestDate: "2023-05-14",
-  },
-  {
-    id: "req002",
-    name: "Sarah Williams",
-    email: "sarah.williams@example.com",
-    department: "Support",
-    requestDate: "2023-05-15",
-  },
-  {
-    id: "req003",
-    name: "David Brown",
-    email: "david.brown@example.com",
-    department: "Marketing",
-    requestDate: "2023-05-15",
-  },
-]
+interface RegistrationRequest {
+  id: string
+  name: string
+  email: string
+  department: string
+  request_date: string
+}
+
+export const mockPendingAccounts: RegistrationRequest[] = []
 
 export default function AccountRequestsPage() {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [pendingAccounts, setPendingAccounts] = useState(mockPendingAccounts)
+  const [pendingAccounts, setPendingAccounts] = useState<RegistrationRequest[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -59,27 +46,104 @@ export default function AccountRequestsPage() {
     }
 
     setUserRole(role)
-    setIsLoading(false)
+    fetchPendingRequests()
   }, [router])
 
-  const handleApprove = (id: string) => {
-    // In a real app, you would send this to your server
-    // For demo purposes, we'll just update the UI
-    setPendingAccounts(pendingAccounts.filter((account) => account.id !== id))
-    toast({
-      title: "Account Approved",
-      description: "The user account has been approved and activated.",
-    })
+  const fetchPendingRequests = async () => {
+    try {
+      const supabase = createClientSupabaseClient()
+      const { data, error } = await supabase
+        .from("registration_requests")
+        .select("*")
+        .eq("status", "pending")
+        .order("request_date", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching registration requests:", error)
+        toast({
+          title: "Error",
+          description: "Failed to load account requests",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Format the data for display
+      const formattedData = data.map((request) => ({
+        id: request.id,
+        name: request.name,
+        email: request.email,
+        department: request.department,
+        request_date: new Date(request.request_date).toLocaleDateString(),
+      }))
+
+      setPendingAccounts(formattedData)
+    } catch (error) {
+      console.error("Error in fetchPendingRequests:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleReject = (id: string) => {
-    // In a real app, you would send this to your server
-    // For demo purposes, we'll just update the UI
-    setPendingAccounts(pendingAccounts.filter((account) => account.id !== id))
-    toast({
-      title: "Account Rejected",
-      description: "The user account request has been rejected.",
-    })
+  const handleApprove = async (id: string) => {
+    try {
+      const result = await approveRegistrationRequest(id)
+
+      if (result.success) {
+        toast({
+          title: "Account Approved",
+          description: "The user account has been approved and activated.",
+        })
+        // Refresh the list
+        fetchPendingRequests()
+      } else {
+        toast({
+          title: "Approval Failed",
+          description: result.message || "Failed to approve account request.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error in handleApprove:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    try {
+      const result = await rejectRegistrationRequest(id)
+
+      if (result.success) {
+        toast({
+          title: "Account Rejected",
+          description: "The user account request has been rejected.",
+        })
+        // Refresh the list
+        fetchPendingRequests()
+      } else {
+        toast({
+          title: "Rejection Failed",
+          description: result.message || "Failed to reject account request.",
+          variant: "destructive",
+        })
+      }
+    } catch (error) {
+      console.error("Error in handleReject:", error)
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      })
+    }
   }
 
   const filteredAccounts = pendingAccounts.filter(
@@ -143,7 +207,7 @@ export default function AccountRequestsPage() {
                     <div>
                       <Badge variant="outline">{account.department}</Badge>
                     </div>
-                    <div>{account.requestDate}</div>
+                    <div>{account.request_date}</div>
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
