@@ -180,8 +180,8 @@ export default function LoginPage() {
               </Button>
               <p className="mt-4 text-center text-sm text-muted-foreground">
                 Don&apos;t have an account?{" "}
-                <Link href="#" className="text-primary underline-offset-4 hover:underline">
-                  Contact your administrator
+                <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+                  Create an account
                 </Link>
               </p>
             </CardFooter>

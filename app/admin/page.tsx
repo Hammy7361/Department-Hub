@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { toast } from "@/components/ui/use-toast"
 import { Users, RefreshCw, Save } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { mockPendingAccounts } from "../admin/accounts/page"
 
 export default function AdminPage() {
   const [userRole, setUserRole] = useState<string | null>(null)
@@ -85,6 +87,12 @@ export default function AdminPage() {
                     <Button>
                       <Users className="mr-2 h-4 w-4" />
                       Add User
+                    </Button>
+                    <Button variant="outline" onClick={() => router.push("/admin/accounts")}>
+                      Pending Requests
+                      <Badge variant="secondary" className="ml-2">
+                        {mockPendingAccounts.length}
+                      </Badge>
                     </Button>
                   </div>
 

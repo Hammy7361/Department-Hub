@@ -15,7 +15,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { CalendarDays, Users, Home, LogOut, Menu, X, Clock, User, FileText, Settings, Shield } from "lucide-react"
+import {
+  CalendarDays,
+  Users,
+  Home,
+  LogOut,
+  Menu,
+  X,
+  Clock,
+  User,
+  FileText,
+  Settings,
+  Shield,
+  UserPlus,
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface DashboardLayoutProps {
@@ -69,6 +82,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const adminNavItems = [
     { name: "Admin Panel", href: "/admin", icon: Shield },
     { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Account Requests", href: "/admin/accounts", icon: UserPlus },
   ]
 
   // Determine which nav items to show based on role
