@@ -250,9 +250,11 @@ export default function SchedulePage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Departments</SelectItem>
-                      <SelectItem value="Sales">Sales</SelectItem>
-                      <SelectItem value="Support">Support</SelectItem>
-                      <SelectItem value="HR">HR</SelectItem>
+                      <SelectItem value="Meat Market">Meat Market</SelectItem>
+                      <SelectItem value="Deli">Deli</SelectItem>
+                      <SelectItem value="Produce">Produce</SelectItem>
+                      <SelectItem value="Grocery">Grocery</SelectItem>
+                      <SelectItem value="Cashier">Cashier</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -312,11 +314,15 @@ export default function SchedulePage() {
                                 <div
                                   key={shift.id}
                                   className={`mb-1 p-2 rounded-md text-xs relative group ${
-                                    shift.department === "Sales"
-                                      ? "bg-blue-100"
-                                      : shift.department === "Support"
-                                        ? "bg-green-100"
-                                        : "bg-purple-100"
+                                    shift.department === "Meat Market"
+                                      ? "bg-red-100"
+                                      : shift.department === "Deli"
+                                        ? "bg-yellow-100"
+                                        : shift.department === "Produce"
+                                          ? "bg-green-100"
+                                          : shift.department === "Grocery"
+                                            ? "bg-blue-100"
+                                            : "bg-purple-100"
                                   }`}
                                 >
                                   <div className="font-medium">{shift.employee}</div>
@@ -324,6 +330,7 @@ export default function SchedulePage() {
                                     {shift.startTime} - {shift.endTime}
                                   </div>
                                   <div className="text-muted-foreground">{shift.department}</div>
+                                  {shift.position && <div className="text-xs italic">{shift.position}</div>}
                                   {(userRole === "manager" || userRole === "admin") && (
                                     <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1">
                                       <Button
@@ -361,6 +368,7 @@ export default function SchedulePage() {
                                     endTime: "17:00",
                                     hours: 8,
                                     department: "",
+                                    position: "",
                                   })
                                   setIsEditing(false)
                                   setIsModalOpen(true)
@@ -396,6 +404,7 @@ export default function SchedulePage() {
                                 endTime: "17:00",
                                 hours: 8,
                                 department: "",
+                                position: "",
                               })
                               setIsEditing(false)
                               setIsModalOpen(true)
@@ -417,6 +426,7 @@ export default function SchedulePage() {
                               <div>
                                 <div className="font-medium">{shift.employee}</div>
                                 <div className="text-sm text-muted-foreground">{shift.department}</div>
+                                {shift.position && <div className="text-xs italic">{shift.position}</div>}
                               </div>
                               <div className="text-right">
                                 <div>
@@ -494,6 +504,7 @@ export default function SchedulePage() {
                                       endTime: "17:00",
                                       hours: 8,
                                       department: "",
+                                      position: "",
                                     })
                                     setIsEditing(false)
                                     setIsModalOpen(true)
@@ -511,11 +522,15 @@ export default function SchedulePage() {
                                   <div
                                     key={shift.id}
                                     className={`mb-1 p-1 rounded-md text-xs group cursor-pointer ${
-                                      shift.department === "Sales"
-                                        ? "bg-blue-100"
-                                        : shift.department === "Support"
-                                          ? "bg-green-100"
-                                          : "bg-purple-100"
+                                      shift.department === "Meat Market"
+                                        ? "bg-red-100"
+                                        : shift.department === "Deli"
+                                          ? "bg-yellow-100"
+                                          : shift.department === "Produce"
+                                            ? "bg-green-100"
+                                            : shift.department === "Grocery"
+                                              ? "bg-blue-100"
+                                              : "bg-purple-100"
                                     }`}
                                     onClick={() =>
                                       (userRole === "manager" || userRole === "admin") && handleEditShift(shift)
@@ -525,6 +540,9 @@ export default function SchedulePage() {
                                     <div className="truncate text-[10px]">
                                       {shift.startTime}-{shift.endTime}
                                     </div>
+                                    {shift.position && (
+                                      <div className="truncate text-[10px] italic">{shift.position}</div>
+                                    )}
                                   </div>
                                 ))}
                           </div>

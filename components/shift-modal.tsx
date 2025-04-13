@@ -28,6 +28,7 @@ export interface ShiftData {
   endTime: string
   hours: number
   department: string
+  position?: string
 }
 
 interface ShiftModalProps {
@@ -46,6 +47,7 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
     endTime: "17:00",
     hours: 8,
     department: "",
+    position: "",
   })
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
 
@@ -63,6 +65,7 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
         endTime: "17:00",
         hours: 8,
         department: "",
+        position: "",
       })
       setSelectedDate(new Date())
     }
@@ -156,11 +159,41 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Sales">Sales</SelectItem>
-                  <SelectItem value="Support">Support</SelectItem>
-                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="Meat Market">Meat Market</SelectItem>
+                  <SelectItem value="Deli">Deli</SelectItem>
+                  <SelectItem value="Produce">Produce</SelectItem>
+                  <SelectItem value="Grocery">Grocery</SelectItem>
+                  <SelectItem value="Cashier">Cashier</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="position" className="text-right">
+              Position
+            </Label>
+            <div className="col-span-3">
+              {shift.department === "Meat Market" ? (
+                <Select value={shift.position} onValueChange={(value) => setShift({ ...shift, position: value })}>
+                  <SelectTrigger id="position">
+                    <SelectValue placeholder="Select position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Manager">Manager</SelectItem>
+                    <SelectItem value="Assistant Manager">Assistant Manager</SelectItem>
+                    <SelectItem value="Meat Cutter">Meat Cutter</SelectItem>
+                    <SelectItem value="Cleanup">Cleanup</SelectItem>
+                    <SelectItem value="Trainee">Trainee</SelectItem>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id="position"
+                  placeholder="Position (optional)"
+                  value={shift.position || ""}
+                  onChange={(e) => setShift({ ...shift, position: e.target.value })}
+                />
+              )}
             </div>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -227,7 +260,10 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!shift.employee || !shift.department}>
+          <Button
+            onClick={handleSave}
+            disabled={!shift.employee || !shift.department || (shift.department === "Meat Market" && !shift.position)}
+          >
             {isEditing ? "Update Shift" : "Create Shift"}
           </Button>
         </DialogFooter>
