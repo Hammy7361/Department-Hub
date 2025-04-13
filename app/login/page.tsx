@@ -50,6 +50,15 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
+      // First, try to seed the initial users if they don't exist
+      // This helps with the transition to the database
+      try {
+        await fetch("/api/seed-admin")
+      } catch (error) {
+        console.error("Error seeding initial users:", error)
+        // Continue with login attempt even if seeding fails
+      }
+
       const result = await authenticateUser(email, password)
 
       if (result.success && result.user) {
