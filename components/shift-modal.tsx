@@ -20,6 +20,9 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { mockEmployeeData } from "@/lib/mock-data"
 
+// Meat Market employees
+const MEAT_MARKET_EMPLOYEES = ["Shane", "James", "Randy", "David", "Crystal", "Jamey", "Roland", "Taylor"]
+
 export interface ShiftData {
   id?: string
   employee: string
@@ -140,11 +143,17 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
                   <SelectValue placeholder="Select employee" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockEmployeeData.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.name}>
-                      {employee.name}
-                    </SelectItem>
-                  ))}
+                  {shift.department === "Meat Market"
+                    ? MEAT_MARKET_EMPLOYEES.map((employee) => (
+                        <SelectItem key={employee} value={employee}>
+                          {employee}
+                        </SelectItem>
+                      ))
+                    : mockEmployeeData.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.name}>
+                          {employee.name}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
             </div>

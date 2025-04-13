@@ -86,6 +86,24 @@ export default function SchedulePage() {
     }
   }, [scheduleData, isLoading])
 
+  useEffect(() => {
+    // Reset employee filter when department filter changes
+    if (departmentFilter === "Meat Market") {
+      if (
+        employeeFilter !== "all" &&
+        !["Shane", "James", "Randy", "David", "Crystal", "Jamey", "Roland", "Taylor"].includes(employeeFilter)
+      ) {
+        setEmployeeFilter("all")
+      }
+    } else if (
+      departmentFilter !== "all" &&
+      employeeFilter !== "all" &&
+      ["Shane", "James", "Randy", "David", "Crystal", "Jamey", "Roland", "Taylor"].includes(employeeFilter)
+    ) {
+      setEmployeeFilter("all")
+    }
+  }, [departmentFilter, employeeFilter])
+
   const handleCreateShift = () => {
     setCurrentShift(undefined)
     setIsEditing(false)
@@ -231,12 +249,27 @@ export default function SchedulePage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Employees</SelectItem>
-                      <SelectItem value="John Doe">John Doe</SelectItem>
-                      <SelectItem value="Jane Smith">Jane Smith</SelectItem>
-                      <SelectItem value="Bob Johnson">Bob Johnson</SelectItem>
-                      <SelectItem value="Alice Williams">Alice Williams</SelectItem>
-                      <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
-                      <SelectItem value="Diana Prince">Diana Prince</SelectItem>
+                      {departmentFilter === "Meat Market" ? (
+                        <>
+                          <SelectItem value="Shane">Shane</SelectItem>
+                          <SelectItem value="James">James</SelectItem>
+                          <SelectItem value="Randy">Randy</SelectItem>
+                          <SelectItem value="David">David</SelectItem>
+                          <SelectItem value="Crystal">Crystal</SelectItem>
+                          <SelectItem value="Jamey">Jamey</SelectItem>
+                          <SelectItem value="Roland">Roland</SelectItem>
+                          <SelectItem value="Taylor">Taylor</SelectItem>
+                        </>
+                      ) : (
+                        <>
+                          <SelectItem value="John Doe">John Doe</SelectItem>
+                          <SelectItem value="Jane Smith">Jane Smith</SelectItem>
+                          <SelectItem value="Bob Johnson">Bob Johnson</SelectItem>
+                          <SelectItem value="Alice Williams">Alice Williams</SelectItem>
+                          <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
+                          <SelectItem value="Diana Prince">Diana Prince</SelectItem>
+                        </>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

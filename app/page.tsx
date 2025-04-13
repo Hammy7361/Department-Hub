@@ -9,7 +9,8 @@ export default function Home() {
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Clock className="h-6 w-6" />
-            <span className="text-xl font-bold">Department Hub</span>
+            <span className="text-xl font-bold">Warehouse Discount Grocery</span>
+            <span className="text-xs ml-2 text-muted-foreground">Hanceville</span>
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="/login" className="text-sm font-medium hover:underline underline-offset-4">
@@ -48,7 +49,7 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                  Department Hub: Your Complete Workplace Solution
+                  Warehouse Discount Grocery: Schedule Management
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
                   Manage schedules, access department resources, collaborate with team members, and streamline workplace

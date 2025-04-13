@@ -109,7 +109,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </Button>
         <Link href="/dashboard" className="flex items-center gap-2">
           <Clock className="h-6 w-6" />
-          <span className="text-xl font-bold">Department Hub</span>
+          <span className="text-xl font-bold">Warehouse Discount Grocery</span>
+          <span className="text-xs ml-2 text-muted-foreground">Hanceville</span>
         </Link>
         {userRole === "admin" && (
           <Badge variant="destructive" className="ml-2">

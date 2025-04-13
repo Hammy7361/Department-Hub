@@ -105,7 +105,8 @@ export default function LoginPage() {
         <div className="container flex h-16 items-center px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Clock className="h-6 w-6" />
-            <span className="text-xl font-bold">Department Hub</span>
+            <span className="text-xl font-bold">Warehouse Discount Grocery</span>
+            <span className="text-xs ml-2 text-muted-foreground">Hanceville</span>
           </Link>
         </div>
       </header>
@@ -173,7 +174,7 @@ export default function LoginPage() {
       </main>
       <footer className="border-t bg-gray-100">
         <div className="container flex flex-col gap-2 py-6 px-4 md:flex-row md:items-center md:gap-4 md:px-6">
-          <p className="text-xs text-gray-500 md:text-sm">© 2024 Department Hub. All rights reserved.</p>
+          <p className="text-xs text-gray-500 md:text-sm">© 2024 Warehouse Discount Grocery. All rights reserved.</p>
         </div>
       </footer>
     </div>
