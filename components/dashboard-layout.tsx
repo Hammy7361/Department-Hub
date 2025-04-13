@@ -38,6 +38,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
@@ -50,18 +51,33 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       return
     }
 
-    // Get user role and email
+    // Get user role, email, and name
     const role = localStorage.getItem("userRole")
     const email = localStorage.getItem("userEmail")
+    const name = localStorage.getItem("userName") || getUserNameFromEmail(email || "")
+
     setUserRole(role)
     setUserEmail(email)
+    setUserName(name)
   }, [router])
+
+  // Helper function to get a display name from email
+  const getUserNameFromEmail = (email: string): string => {
+    if (email === "admin") return "Admin"
+    if (email === "Shanehawley2191@hotmail.com") return "Shane"
+    if (email === "rnisley7361@gmail.com") return "Roland"
+
+    // For other emails, extract the name part before the @ symbol
+    const namePart = email.split("@")[0]
+    return namePart.charAt(0).toUpperCase() + namePart.slice(1)
+  }
 
   const handleLogout = () => {
     // Clear login state but keep remembered user if that option was selected
     localStorage.removeItem("isLoggedIn")
     localStorage.removeItem("userRole")
     localStorage.removeItem("userEmail")
+    localStorage.removeItem("userName")
 
     // Only remove persistent login, but keep the remembered email if it exists
     localStorage.removeItem("persistentLogin")
@@ -124,7 +140,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Avatar className="h-8 w-8">
                   <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Avatar" />
                   <AvatarFallback>
-                    {userRole === "admin" ? "AD" : userEmail?.substring(0, 2).toUpperCase() || "UN"}
+                    {userName
+                      ? userName.substring(0, 2).toUpperCase()
+                      : userEmail?.substring(0, 2).toUpperCase() || "UN"}
                   </AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
@@ -132,7 +150,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>
-                {userRole === "admin" ? "Admin Account" : "My Account"}
+                {userName || "My Account"}
                 {userRole && (
                   <span className="block text-xs text-muted-foreground mt-1">
                     {userRole.charAt(0).toUpperCase() + userRole.slice(1)}

@@ -99,6 +99,20 @@ export default function LoginPage() {
     }
   }
 
+  // Quick login buttons for demo purposes
+  const handleQuickLogin = (userType: string) => {
+    if (userType === "admin") {
+      setEmail("admin")
+      setPassword("]tY~J%y-\\zhQOW(Zj0*h")
+    } else if (userType === "manager") {
+      setEmail("Shanehawley2191@hotmail.com")
+      setPassword("ManagerPassword123")
+    } else if (userType === "roland") {
+      setEmail("rnisley7361@gmail.com")
+      setPassword("MeatCutter123")
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="bg-white border-b">
@@ -156,6 +170,22 @@ export default function LoginPage() {
                 >
                   Remember me
                 </Label>
+              </div>
+
+              {/* Quick login buttons for demo purposes */}
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground mb-2">Demo Accounts:</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => handleQuickLogin("admin")}>
+                    Admin
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handleQuickLogin("manager")}>
+                    Manager (Shane)
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={() => handleQuickLogin("roland")}>
+                    Roland
+                  </Button>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col">

@@ -8,6 +8,7 @@ export async function seedInitialUsers() {
   const results = {
     admin: { success: false, message: "" },
     manager: { success: false, message: "" },
+    roland: { success: false, message: "" },
   }
 
   try {
@@ -60,7 +61,7 @@ export async function seedInitialUsers() {
         email: "Shanehawley2191@hotmail.com",
         password_hash: passwordHash,
         role: "manager",
-        department: "Sales",
+        department: "Meat Market",
         hire_date: new Date().toISOString().split("T")[0],
       })
 
@@ -72,12 +73,46 @@ export async function seedInitialUsers() {
       }
     }
 
+    // Check if Roland's account already exists
+    const { data: existingRoland } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", "rnisley7361@gmail.com")
+      .single()
+
+    if (existingRoland) {
+      console.log("Roland's user account already exists")
+      results.roland = { success: true, message: "Roland's user account already exists" }
+    } else {
+      // Create Roland's account with a default password
+      const ROLAND_PASSWORD = "MeatCutter123"
+      const passwordHash = await hashPassword(ROLAND_PASSWORD)
+
+      const { error } = await supabase.from("users").insert({
+        name: "Roland",
+        email: "rnisley7361@gmail.com",
+        password_hash: passwordHash,
+        role: "associate",
+        department: "Meat Market",
+        position: "Meat Cutter",
+        hire_date: "2020-07-12",
+      })
+
+      if (error) {
+        console.error("Error creating Roland's user account:", error)
+        results.roland = { success: false, message: "Failed to create Roland's user account" }
+      } else {
+        results.roland = { success: true, message: "Roland's user account created successfully" }
+      }
+    }
+
     return results
   } catch (error) {
     console.error("Error in seedInitialUsers:", error)
     return {
       admin: { success: false, message: "An error occurred while creating users" },
       manager: { success: false, message: "An error occurred while creating users" },
+      roland: { success: false, message: "An error occurred while creating users" },
     }
   }
 }
