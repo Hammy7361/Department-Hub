@@ -60,18 +60,18 @@ export default function SchedulePage() {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-[240px_1fr]">
+        <div className="grid gap-4 md:grid-cols-[300px_1fr]">
           <div className="flex flex-col gap-4">
-            <Card>
+            <Card className="w-full">
               <CardHeader>
                 <CardTitle>Date</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="flex justify-center">
                 <Calendar
                   mode="single"
                   selected={date}
                   onSelect={(date) => date && setDate(date)}
-                  className="rounded-md border"
+                  className="rounded-md border w-full max-w-[280px]"
                 />
               </CardContent>
             </Card>
@@ -128,7 +128,7 @@ export default function SchedulePage() {
                         : `${date.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`}
                   </CardDescription>
                 </div>
-                <Tabs defaultValue="week" onValueChange={setView}>
+                <Tabs defaultValue="week" onValueChange={setView} className="w-auto">
                   <TabsList>
                     <TabsTrigger value="day">Day</TabsTrigger>
                     <TabsTrigger value="week">Week</TabsTrigger>
@@ -138,7 +138,7 @@ export default function SchedulePage() {
               </CardHeader>
               <CardContent>
                 {view === "week" && (
-                  <div className="border rounded-md">
+                  <div className="border rounded-md overflow-hidden">
                     <div className="grid grid-cols-7 bg-muted text-center py-2 font-medium border-b">
                       <div>Sun</div>
                       <div>Mon</div>
@@ -267,7 +267,7 @@ export default function SchedulePage() {
                             <div className="text-xs font-medium mb-1">{isCurrentMonth ? dayNumber : ""}</div>
                             {isCurrentMonth &&
                               mockScheduleData
-                                .filterer((shift) => {
+                                .filter((shift) => {
                                   const shiftDate = new Date(shift.date)
                                   return (
                                     shiftDate.getDate() === dayNumber &&
