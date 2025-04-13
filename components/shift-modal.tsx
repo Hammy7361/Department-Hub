@@ -52,6 +52,7 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
   useEffect(() => {
     if (initialData) {
       setShift(initialData)
+      // Convert string date to Date object for the calendar
       setSelectedDate(new Date(initialData.date))
     } else {
       // Reset form for new shift
@@ -70,9 +71,11 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setSelectedDate(date)
+      // Format date as YYYY-MM-DD for storage
+      const formattedDate = date.toISOString().split("T")[0]
       setShift({
         ...shift,
-        date: date.toISOString().split("T")[0],
+        date: formattedDate,
       })
     }
   }
@@ -91,7 +94,7 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
       minutes += 60
     }
 
-    return hours + minutes / 60
+    return Number.parseFloat((hours + minutes / 60).toFixed(2))
   }
 
   const handleTimeChange = (field: "startTime" | "endTime", value: string) => {
@@ -106,7 +109,12 @@ export function ShiftModal({ isOpen, onClose, onSave, initialData, isEditing = f
   }
 
   const handleSave = () => {
-    onSave(shift)
+    // Ensure date is properly formatted
+    const formattedShift = {
+      ...shift,
+      date: selectedDate ? selectedDate.toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+    }
+    onSave(formattedShift)
   }
 
   return (

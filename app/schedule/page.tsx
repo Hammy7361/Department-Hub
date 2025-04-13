@@ -23,6 +23,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+// Local storage key for shifts
+const SHIFTS_STORAGE_KEY = "department-hub-shifts"
+
 export default function SchedulePage() {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -39,6 +42,7 @@ export default function SchedulePage() {
 
   const router = useRouter()
 
+  // Load shifts from localStorage on component mount
   useEffect(() => {
     // Check if user is logged in
     const isLoggedIn = localStorage.getItem("isLoggedIn")
@@ -51,9 +55,22 @@ export default function SchedulePage() {
     const role = localStorage.getItem("userRole")
     setUserRole(role)
 
-    // Load schedule data
-    // In a real app, this would come from an API or database
-    // For now, we'll use the mock data but add IDs to each shift
+    // Try to load shifts from localStorage first
+    const savedShifts = localStorage.getItem(SHIFTS_STORAGE_KEY)
+
+    if (savedShifts) {
+      try {
+        const parsedShifts = JSON.parse(savedShifts)
+        setScheduleData(parsedShifts)
+        setIsLoading(false)
+        return
+      } catch (error) {
+        console.error("Error parsing saved shifts:", error)
+        // If there's an error parsing, we'll fall back to mock data
+      }
+    }
+
+    // If no saved shifts or error parsing, use mock data
     const dataWithIds = mockScheduleData.map((shift, index) => ({
       ...shift,
       id: `shift-${index + 1}`,
@@ -61,6 +78,13 @@ export default function SchedulePage() {
     setScheduleData(dataWithIds)
     setIsLoading(false)
   }, [router])
+
+  // Save shifts to localStorage whenever scheduleData changes
+  useEffect(() => {
+    if (!isLoading) {
+      localStorage.setItem(SHIFTS_STORAGE_KEY, JSON.stringify(scheduleData))
+    }
+  }, [scheduleData, isLoading])
 
   const handleCreateShift = () => {
     setCurrentShift(undefined)
@@ -81,7 +105,8 @@ export default function SchedulePage() {
 
   const confirmDeleteShift = () => {
     if (shiftToDelete) {
-      setScheduleData(scheduleData.filter((shift) => shift.id !== shiftToDelete))
+      const updatedShifts = scheduleData.filter((shift) => shift.id !== shiftToDelete)
+      setScheduleData(updatedShifts)
       toast({
         title: "Shift Deleted",
         description: "The shift has been removed from the schedule.",
@@ -91,11 +116,14 @@ export default function SchedulePage() {
   }
 
   const handleSaveShift = (shiftData: ShiftData) => {
+    let updatedShifts: ShiftData[] = []
+
     if (isEditing && currentShift?.id) {
       // Update existing shift
-      setScheduleData(
-        scheduleData.map((shift) => (shift.id === currentShift.id ? { ...shiftData, id: currentShift.id } : shift)),
+      updatedShifts = scheduleData.map((shift) =>
+        shift.id === currentShift.id ? { ...shiftData, id: currentShift.id } : shift,
       )
+      setScheduleData(updatedShifts)
       toast({
         title: "Shift Updated",
         description: "The shift has been updated successfully.",
@@ -106,13 +134,31 @@ export default function SchedulePage() {
         ...shiftData,
         id: `shift-${Date.now()}`,
       }
-      setScheduleData([...scheduleData, newShift])
+      updatedShifts = [...scheduleData, newShift]
+      setScheduleData(updatedShifts)
       toast({
         title: "Shift Created",
         description: "A new shift has been added to the schedule.",
       })
     }
+
+    // Save to localStorage immediately
+    localStorage.setItem(SHIFTS_STORAGE_KEY, JSON.stringify(updatedShifts))
     setIsModalOpen(false)
+  }
+
+  // Reset all shifts to default mock data
+  const handleResetShifts = () => {
+    const dataWithIds = mockScheduleData.map((shift, index) => ({
+      ...shift,
+      id: `shift-${index + 1}`,
+    }))
+    setScheduleData(dataWithIds)
+    localStorage.setItem(SHIFTS_STORAGE_KEY, JSON.stringify(dataWithIds))
+    toast({
+      title: "Schedule Reset",
+      description: "The schedule has been reset to default data.",
+    })
   }
 
   // Apply filters to schedule data
@@ -142,10 +188,15 @@ export default function SchedulePage() {
           </div>
           <div className="flex items-center gap-2">
             {(userRole === "manager" || userRole === "admin") && (
-              <Button onClick={handleCreateShift}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                Create Shift
-              </Button>
+              <>
+                <Button onClick={handleCreateShift}>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Create Shift
+                </Button>
+                <Button variant="outline" onClick={handleResetShifts}>
+                  Reset Schedule
+                </Button>
+              </>
             )}
           </div>
         </div>
