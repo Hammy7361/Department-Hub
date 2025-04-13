@@ -111,27 +111,43 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-4">
                   <Avatar>
                     <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Avatar" />
-                    <AvatarFallback>JD</AvatarFallback>
+                    <AvatarFallback>SH</AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">New Schedule Posted</p>
+                    <p className="text-sm font-medium">Meat Market Schedule Updated</p>
                     <p className="text-sm text-muted-foreground">
-                      The schedule for next month has been posted. Please check your shifts.
+                      The schedule for next week has been posted. Please check your shifts and let me know if you have
+                      any conflicts.
                     </p>
-                    <p className="text-xs text-muted-foreground">Posted by John Doe (Manager) - 2 days ago</p>
+                    <p className="text-xs text-muted-foreground">Posted by Shane (Manager) - 1 day ago</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
                   <Avatar>
                     <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Avatar" />
-                    <AvatarFallback>JS</AvatarFallback>
+                    <AvatarFallback>SH</AvatarFallback>
                   </Avatar>
                   <div className="space-y-1">
-                    <p className="text-sm font-medium">Holiday Coverage</p>
+                    <p className="text-sm font-medium">New Meat Cutting Procedures</p>
                     <p className="text-sm text-muted-foreground">
-                      We need volunteers for holiday shifts. Please contact management if interested.
+                      We have updated our meat cutting procedures to improve efficiency. Training session will be held
+                      this Friday.
                     </p>
-                    <p className="text-xs text-muted-foreground">Posted by Jane Smith (Manager) - 5 days ago</p>
+                    <p className="text-xs text-muted-foreground">Posted by Shane (Manager) - 3 days ago</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" alt="Avatar" />
+                    <AvatarFallback>JM</AvatarFallback>
+                  </Avatar>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Holiday Coverage Needed</p>
+                    <p className="text-sm text-muted-foreground">
+                      We need volunteers for the upcoming holiday weekend. Please contact management if you're available
+                      to work.
+                    </p>
+                    <p className="text-xs text-muted-foreground">Posted by James (Assistant Manager) - 5 days ago</p>
                   </div>
                 </div>
               </div>

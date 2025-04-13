@@ -22,6 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { SendScheduleModal } from "@/components/send-schedule-modal"
 
 // Local storage key for shifts
 const SHIFTS_STORAGE_KEY = "department-hub-shifts"
@@ -39,6 +40,7 @@ export default function SchedulePage() {
   const [departmentFilter, setDepartmentFilter] = useState("all")
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [shiftToDelete, setShiftToDelete] = useState<string | undefined>(undefined)
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false)
 
   const router = useRouter()
 
@@ -179,6 +181,21 @@ export default function SchedulePage() {
     })
   }
 
+  const getDateRange = () => {
+    if (view === "day") {
+      return { startDate: date, endDate: date }
+    } else if (view === "week") {
+      const startDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay())
+      const endDate = new Date(date.getFullYear(), date.getMonth(), date.getDate() - date.getDay() + 6)
+      return { startDate, endDate }
+    } else {
+      // Month view
+      const startDate = new Date(date.getFullYear(), date.getMonth(), 1)
+      const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0)
+      return { startDate, endDate }
+    }
+  }
+
   // Apply filters to schedule data
   const filteredScheduleData = scheduleData.filter((shift) => {
     const matchesEmployee = employeeFilter === "all" || shift.employee === employeeFilter
@@ -210,6 +227,9 @@ export default function SchedulePage() {
                 <Button onClick={handleCreateShift}>
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Shift
+                </Button>
+                <Button variant="secondary" onClick={() => setIsSendModalOpen(true)}>
+                  Send Schedule
                 </Button>
                 <Button variant="outline" onClick={handleResetShifts}>
                   Reset Schedule
@@ -616,6 +636,15 @@ export default function SchedulePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Send Schedule Modal */}
+      <SendScheduleModal
+        isOpen={isSendModalOpen}
+        onClose={() => setIsSendModalOpen(false)}
+        scheduleData={filteredScheduleData}
+        startDate={getDateRange().startDate}
+        endDate={getDateRange().endDate}
+      />
     </DashboardLayout>
   )
 }
