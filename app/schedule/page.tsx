@@ -8,14 +8,35 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar } from "@/components/ui/calendar"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { PlusCircle, Edit2 } from "lucide-react"
+import { PlusCircle, Edit2, Trash2 } from "lucide-react"
 import { mockScheduleData } from "@/lib/mock-data"
+import { ShiftModal, type ShiftData } from "@/components/shift-modal"
+import { toast } from "@/components/ui/use-toast"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function SchedulePage() {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [date, setDate] = useState<Date>(new Date())
   const [view, setView] = useState("week")
+  const [scheduleData, setScheduleData] = useState<ShiftData[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [currentShift, setCurrentShift] = useState<ShiftData | undefined>(undefined)
+  const [isEditing, setIsEditing] = useState(false)
+  const [employeeFilter, setEmployeeFilter] = useState("all")
+  const [departmentFilter, setDepartmentFilter] = useState("all")
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [shiftToDelete, setShiftToDelete] = useState<string | undefined>(undefined)
+
   const router = useRouter()
 
   useEffect(() => {
@@ -29,8 +50,77 @@ export default function SchedulePage() {
     // Get user role
     const role = localStorage.getItem("userRole")
     setUserRole(role)
+
+    // Load schedule data
+    // In a real app, this would come from an API or database
+    // For now, we'll use the mock data but add IDs to each shift
+    const dataWithIds = mockScheduleData.map((shift, index) => ({
+      ...shift,
+      id: `shift-${index + 1}`,
+    }))
+    setScheduleData(dataWithIds)
     setIsLoading(false)
   }, [router])
+
+  const handleCreateShift = () => {
+    setCurrentShift(undefined)
+    setIsEditing(false)
+    setIsModalOpen(true)
+  }
+
+  const handleEditShift = (shift: ShiftData) => {
+    setCurrentShift(shift)
+    setIsEditing(true)
+    setIsModalOpen(true)
+  }
+
+  const handleDeleteShift = (shiftId: string) => {
+    setShiftToDelete(shiftId)
+    setIsDeleteDialogOpen(true)
+  }
+
+  const confirmDeleteShift = () => {
+    if (shiftToDelete) {
+      setScheduleData(scheduleData.filter((shift) => shift.id !== shiftToDelete))
+      toast({
+        title: "Shift Deleted",
+        description: "The shift has been removed from the schedule.",
+      })
+      setIsDeleteDialogOpen(false)
+    }
+  }
+
+  const handleSaveShift = (shiftData: ShiftData) => {
+    if (isEditing && currentShift?.id) {
+      // Update existing shift
+      setScheduleData(
+        scheduleData.map((shift) => (shift.id === currentShift.id ? { ...shiftData, id: currentShift.id } : shift)),
+      )
+      toast({
+        title: "Shift Updated",
+        description: "The shift has been updated successfully.",
+      })
+    } else {
+      // Create new shift
+      const newShift = {
+        ...shiftData,
+        id: `shift-${Date.now()}`,
+      }
+      setScheduleData([...scheduleData, newShift])
+      toast({
+        title: "Shift Created",
+        description: "A new shift has been added to the schedule.",
+      })
+    }
+    setIsModalOpen(false)
+  }
+
+  // Apply filters to schedule data
+  const filteredScheduleData = scheduleData.filter((shift) => {
+    const matchesEmployee = employeeFilter === "all" || shift.employee === employeeFilter
+    const matchesDepartment = departmentFilter === "all" || shift.department === departmentFilter
+    return matchesEmployee && matchesDepartment
+  })
 
   if (isLoading) {
     return (
@@ -52,9 +142,9 @@ export default function SchedulePage() {
           </div>
           <div className="flex items-center gap-2">
             {userRole === "manager" && (
-              <Button onClick={() => router.push("/schedule/create")}>
+              <Button onClick={handleCreateShift}>
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Create Schedule
+                Create Shift
               </Button>
             )}
           </div>
@@ -84,15 +174,18 @@ export default function SchedulePage() {
                   <label htmlFor="employee" className="text-sm font-medium">
                     Employee
                   </label>
-                  <Select defaultValue="all">
+                  <Select value={employeeFilter} onValueChange={setEmployeeFilter}>
                     <SelectTrigger id="employee">
                       <SelectValue placeholder="Select employee" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Employees</SelectItem>
-                      <SelectItem value="john">John Doe</SelectItem>
-                      <SelectItem value="jane">Jane Smith</SelectItem>
-                      <SelectItem value="bob">Bob Johnson</SelectItem>
+                      <SelectItem value="John Doe">John Doe</SelectItem>
+                      <SelectItem value="Jane Smith">Jane Smith</SelectItem>
+                      <SelectItem value="Bob Johnson">Bob Johnson</SelectItem>
+                      <SelectItem value="Alice Williams">Alice Williams</SelectItem>
+                      <SelectItem value="Charlie Brown">Charlie Brown</SelectItem>
+                      <SelectItem value="Diana Prince">Diana Prince</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -100,15 +193,15 @@ export default function SchedulePage() {
                   <label htmlFor="department" className="text-sm font-medium">
                     Department
                   </label>
-                  <Select defaultValue="all">
+                  <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
                     <SelectTrigger id="department">
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Departments</SelectItem>
-                      <SelectItem value="sales">Sales</SelectItem>
-                      <SelectItem value="support">Support</SelectItem>
-                      <SelectItem value="hr">HR</SelectItem>
+                      <SelectItem value="Sales">Sales</SelectItem>
+                      <SelectItem value="Support">Support</SelectItem>
+                      <SelectItem value="HR">HR</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -149,51 +242,86 @@ export default function SchedulePage() {
                       <div>Sat</div>
                     </div>
                     <div className="grid grid-cols-7 min-h-[500px]">
-                      {Array.from({ length: 7 }).map((_, dayIndex) => (
-                        <div key={dayIndex} className="border-r last:border-r-0 p-2">
-                          <div className="text-xs text-muted-foreground mb-2">
-                            {new Date(
-                              date.getFullYear(),
-                              date.getMonth(),
-                              date.getDate() - date.getDay() + dayIndex,
-                            ).toLocaleDateString("en-US", { month: "numeric", day: "numeric" })}
-                          </div>
-                          {mockScheduleData
-                            .filter((shift) => {
-                              const shiftDate = new Date(shift.date)
-                              const currentDay = new Date(
-                                date.getFullYear(),
-                                date.getMonth(),
-                                date.getDate() - date.getDay() + dayIndex,
-                              )
-                              return shiftDate.toDateString() === currentDay.toDateString()
-                            })
-                            .map((shift, index) => (
-                              <div
-                                key={index}
-                                className={`mb-1 p-2 rounded-md text-xs ${
-                                  shift.department === "Sales"
-                                    ? "bg-blue-100"
-                                    : shift.department === "Support"
-                                      ? "bg-green-100"
-                                      : "bg-purple-100"
-                                }`}
-                              >
-                                <div className="font-medium">{shift.employee}</div>
-                                <div>
-                                  {shift.startTime} - {shift.endTime}
+                      {Array.from({ length: 7 }).map((_, dayIndex) => {
+                        const currentDay = new Date(
+                          date.getFullYear(),
+                          date.getMonth(),
+                          date.getDate() - date.getDay() + dayIndex,
+                        )
+                        const currentDayStr = currentDay.toISOString().split("T")[0]
+
+                        return (
+                          <div key={dayIndex} className="border-r last:border-r-0 p-2 relative">
+                            <div className="text-xs text-muted-foreground mb-2">
+                              {currentDay.toLocaleDateString("en-US", { month: "numeric", day: "numeric" })}
+                            </div>
+                            {filteredScheduleData
+                              .filter((shift) => shift.date === currentDayStr)
+                              .map((shift) => (
+                                <div
+                                  key={shift.id}
+                                  className={`mb-1 p-2 rounded-md text-xs relative group ${
+                                    shift.department === "Sales"
+                                      ? "bg-blue-100"
+                                      : shift.department === "Support"
+                                        ? "bg-green-100"
+                                        : "bg-purple-100"
+                                  }`}
+                                >
+                                  <div className="font-medium">{shift.employee}</div>
+                                  <div>
+                                    {shift.startTime} - {shift.endTime}
+                                  </div>
+                                  <div className="text-muted-foreground">{shift.department}</div>
+                                  {userRole === "manager" && (
+                                    <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 p-0"
+                                        onClick={() => handleEditShift(shift)}
+                                      >
+                                        <Edit2 className="h-3 w-3" />
+                                        <span className="sr-only">Edit</span>
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 p-0 text-red-500"
+                                        onClick={() => handleDeleteShift(shift.id!)}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                        <span className="sr-only">Delete</span>
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="text-muted-foreground">{shift.department}</div>
-                                {userRole === "manager" && (
-                                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0 mt-1">
-                                    <Edit2 className="h-3 w-3" />
-                                    <span className="sr-only">Edit</span>
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                        </div>
-                      ))}
+                              ))}
+                            {userRole === "manager" && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full mt-1 h-6 text-xs border border-dashed border-gray-300 hover:border-gray-400"
+                                onClick={() => {
+                                  setCurrentShift({
+                                    employee: "",
+                                    date: currentDayStr,
+                                    startTime: "09:00",
+                                    endTime: "17:00",
+                                    hours: 8,
+                                    department: "",
+                                  })
+                                  setIsEditing(false)
+                                  setIsModalOpen(true)
+                                }}
+                              >
+                                <PlusCircle className="h-3 w-3 mr-1" />
+                                Add
+                              </Button>
+                            )}
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
@@ -201,18 +329,40 @@ export default function SchedulePage() {
                 {view === "day" && (
                   <div className="border rounded-md">
                     <div className="p-4">
-                      <h3 className="font-medium mb-4">
-                        Shifts for{" "}
-                        {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-                      </h3>
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-medium">
+                          Shifts for{" "}
+                          {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+                        </h3>
+                        {userRole === "manager" && (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              setCurrentShift({
+                                employee: "",
+                                date: date.toISOString().split("T")[0],
+                                startTime: "09:00",
+                                endTime: "17:00",
+                                hours: 8,
+                                department: "",
+                              })
+                              setIsEditing(false)
+                              setIsModalOpen(true)
+                            }}
+                          >
+                            <PlusCircle className="h-4 w-4 mr-1" />
+                            Add Shift
+                          </Button>
+                        )}
+                      </div>
                       <div className="space-y-4">
-                        {mockScheduleData
-                          .filter((shift) => {
-                            const shiftDate = new Date(shift.date)
-                            return shiftDate.toDateString() === date.toDateString()
-                          })
-                          .map((shift, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 border rounded-md">
+                        {filteredScheduleData
+                          .filter((shift) => shift.date === date.toISOString().split("T")[0])
+                          .map((shift) => (
+                            <div
+                              key={shift.id}
+                              className="flex items-center justify-between p-3 border rounded-md group"
+                            >
                               <div>
                                 <div className="font-medium">{shift.employee}</div>
                                 <div className="text-sm text-muted-foreground">{shift.department}</div>
@@ -224,17 +374,26 @@ export default function SchedulePage() {
                                 <div className="text-sm text-muted-foreground">{shift.hours} hours</div>
                               </div>
                               {userRole === "manager" && (
-                                <Button variant="ghost" size="sm" className="ml-4">
-                                  <Edit2 className="h-4 w-4" />
-                                  <span className="sr-only">Edit</span>
-                                </Button>
+                                <div className="ml-4 flex gap-2 opacity-0 group-hover:opacity-100">
+                                  <Button variant="ghost" size="sm" onClick={() => handleEditShift(shift)}>
+                                    <Edit2 className="h-4 w-4" />
+                                    <span className="sr-only">Edit</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-red-500"
+                                    onClick={() => handleDeleteShift(shift.id!)}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                    <span className="sr-only">Delete</span>
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           ))}
-                        {mockScheduleData.filter((shift) => {
-                          const shiftDate = new Date(shift.date)
-                          return shiftDate.toDateString() === date.toDateString()
-                        }).length === 0 && (
+                        {filteredScheduleData.filter((shift) => shift.date === date.toISOString().split("T")[0])
+                          .length === 0 && (
                           <div className="text-center py-8 text-muted-foreground">No shifts scheduled for this day</div>
                         )}
                       </div>
@@ -259,32 +418,55 @@ export default function SchedulePage() {
                         const dayNumber = dayIndex - firstDayOfMonth + 1
                         const isCurrentMonth = dayNumber > 0 && dayNumber <= daysInMonth
 
+                        // Create date string for this day in the month view
+                        const currentMonthDay = isCurrentMonth
+                          ? new Date(date.getFullYear(), date.getMonth(), dayNumber).toISOString().split("T")[0]
+                          : ""
+
                         return (
                           <div
                             key={dayIndex}
-                            className={`bg-background p-2 min-h-[100px] ${!isCurrentMonth ? "text-muted-foreground bg-muted/30" : ""}`}
+                            className={`bg-background p-2 min-h-[100px] relative ${!isCurrentMonth ? "text-muted-foreground bg-muted/30" : ""}`}
                           >
-                            <div className="text-xs font-medium mb-1">{isCurrentMonth ? dayNumber : ""}</div>
+                            <div className="text-xs font-medium mb-1 flex justify-between">
+                              <span>{isCurrentMonth ? dayNumber : ""}</span>
+                              {isCurrentMonth && userRole === "manager" && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-4 w-4 p-0 opacity-0 hover:opacity-100 focus:opacity-100"
+                                  onClick={() => {
+                                    setCurrentShift({
+                                      employee: "",
+                                      date: currentMonthDay,
+                                      startTime: "09:00",
+                                      endTime: "17:00",
+                                      hours: 8,
+                                      department: "",
+                                    })
+                                    setIsEditing(false)
+                                    setIsModalOpen(true)
+                                  }}
+                                >
+                                  <PlusCircle className="h-3 w-3" />
+                                  <span className="sr-only">Add Shift</span>
+                                </Button>
+                              )}
+                            </div>
                             {isCurrentMonth &&
-                              mockScheduleData
-                                .filter((shift) => {
-                                  const shiftDate = new Date(shift.date)
-                                  return (
-                                    shiftDate.getDate() === dayNumber &&
-                                    shiftDate.getMonth() === date.getMonth() &&
-                                    shiftDate.getFullYear() === date.getFullYear()
-                                  )
-                                })
-                                .map((shift, index) => (
+                              filteredScheduleData
+                                .filter((shift) => shift.date === currentMonthDay)
+                                .map((shift) => (
                                   <div
-                                    key={index}
-                                    className={`mb-1 p-1 rounded-md text-xs ${
+                                    key={shift.id}
+                                    className={`mb-1 p-1 rounded-md text-xs group cursor-pointer ${
                                       shift.department === "Sales"
                                         ? "bg-blue-100"
                                         : shift.department === "Support"
                                           ? "bg-green-100"
                                           : "bg-purple-100"
                                     }`}
+                                    onClick={() => userRole === "manager" && handleEditShift(shift)}
                                   >
                                     <div className="truncate">{shift.employee}</div>
                                     <div className="truncate text-[10px]">
@@ -303,6 +485,33 @@ export default function SchedulePage() {
           </div>
         </div>
       </div>
+
+      {/* Shift Modal */}
+      <ShiftModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={handleSaveShift}
+        initialData={currentShift}
+        isEditing={isEditing}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Shift</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this shift? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteShift} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   )
 }
