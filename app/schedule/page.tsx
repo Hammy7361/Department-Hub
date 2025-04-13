@@ -141,7 +141,7 @@ export default function SchedulePage() {
             <p className="text-muted-foreground">View and manage work schedules</p>
           </div>
           <div className="flex items-center gap-2">
-            {userRole === "manager" && (
+            {(userRole === "manager" || userRole === "admin") && (
               <Button onClick={handleCreateShift}>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Create Shift
@@ -273,7 +273,7 @@ export default function SchedulePage() {
                                     {shift.startTime} - {shift.endTime}
                                   </div>
                                   <div className="text-muted-foreground">{shift.department}</div>
-                                  {userRole === "manager" && (
+                                  {(userRole === "manager" || userRole === "admin") && (
                                     <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1">
                                       <Button
                                         variant="ghost"
@@ -297,7 +297,7 @@ export default function SchedulePage() {
                                   )}
                                 </div>
                               ))}
-                            {userRole === "manager" && (
+                            {(userRole === "manager" || userRole === "admin") && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -334,7 +334,7 @@ export default function SchedulePage() {
                           Shifts for{" "}
                           {date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
                         </h3>
-                        {userRole === "manager" && (
+                        {(userRole === "manager" || userRole === "admin") && (
                           <Button
                             size="sm"
                             onClick={() => {
@@ -373,7 +373,7 @@ export default function SchedulePage() {
                                 </div>
                                 <div className="text-sm text-muted-foreground">{shift.hours} hours</div>
                               </div>
-                              {userRole === "manager" && (
+                              {(userRole === "manager" || userRole === "admin") && (
                                 <div className="ml-4 flex gap-2 opacity-0 group-hover:opacity-100">
                                   <Button variant="ghost" size="sm" onClick={() => handleEditShift(shift)}>
                                     <Edit2 className="h-4 w-4" />
@@ -430,7 +430,7 @@ export default function SchedulePage() {
                           >
                             <div className="text-xs font-medium mb-1 flex justify-between">
                               <span>{isCurrentMonth ? dayNumber : ""}</span>
-                              {isCurrentMonth && userRole === "manager" && (
+                              {isCurrentMonth && (userRole === "manager" || userRole === "admin") && (
                                 <Button
                                   variant="ghost"
                                   size="icon"
@@ -466,7 +466,9 @@ export default function SchedulePage() {
                                           ? "bg-green-100"
                                           : "bg-purple-100"
                                     }`}
-                                    onClick={() => userRole === "manager" && handleEditShift(shift)}
+                                    onClick={() =>
+                                      (userRole === "manager" || userRole === "admin") && handleEditShift(shift)
+                                    }
                                   >
                                     <div className="truncate">{shift.employee}</div>
                                     <div className="truncate text-[10px]">

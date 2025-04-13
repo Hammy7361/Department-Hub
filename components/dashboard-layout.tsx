@@ -72,7 +72,14 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   // Base navigation items for all users
   const baseNavItems = [
     { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Schedule", href: "/schedule", icon: CalendarDays },
+    {
+      name: "Schedule",
+      href: "/schedule",
+      icon: CalendarDays,
+      // Add a description that will be shown in tooltips or other UI elements
+      description:
+        userRole === "manager" || userRole === "admin" ? "View and manage work schedules" : "View work schedules",
+    },
     { name: "Employees", href: "/employees", icon: Users },
     { name: "Resources", href: "/resources", icon: FileText },
     { name: "My Profile", href: "/profile", icon: User },
