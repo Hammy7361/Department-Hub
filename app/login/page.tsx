@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Clock } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { authenticateUser } from "@/lib/auth-utils"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -115,13 +116,16 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="bg-white border-b">
-        <div className="container flex h-16 items-center px-4 md:px-6">
+      <header className="bg-background border-b">
+        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <Link href="/" className="flex items-center gap-2">
             <Clock className="h-6 w-6" />
             <span className="text-xl font-bold">Warehouse Discount Grocery</span>
             <span className="text-xs ml-2 text-muted-foreground">Hanceville</span>
           </Link>
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center p-4 md:p-6">
@@ -202,9 +206,11 @@ export default function LoginPage() {
           </form>
         </Card>
       </main>
-      <footer className="border-t bg-gray-100">
+      <footer className="border-t bg-muted">
         <div className="container flex flex-col gap-2 py-6 px-4 md:flex-row md:items-center md:gap-4 md:px-6">
-          <p className="text-xs text-gray-500 md:text-sm">© 2024 Warehouse Discount Grocery. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground md:text-sm">
+            © 2024 Warehouse Discount Grocery. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

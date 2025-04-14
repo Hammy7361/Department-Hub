@@ -30,6 +30,7 @@ import {
   UserPlus,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -134,6 +135,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           </Badge>
         )}
         <div className="ml-auto flex items-center gap-2">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="rounded-full">

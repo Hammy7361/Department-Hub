@@ -1,18 +1,20 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { CalendarDays, Users, Clock } from "lucide-react"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-white border-b">
+      <header className="bg-background border-b">
         <div className="container flex h-16 items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-2">
             <Clock className="h-6 w-6" />
             <span className="text-xl font-bold">Warehouse Discount Grocery</span>
             <span className="text-xs ml-2 text-muted-foreground">Hanceville</span>
           </div>
-          <nav className="hidden md:flex gap-6">
+          <nav className="hidden md:flex gap-6 items-center">
+            <ThemeToggle />
             <Link href="/login" className="text-sm font-medium hover:underline underline-offset-4">
               Login
             </Link>
@@ -44,14 +46,14 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-white to-gray-100">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                   Warehouse Discount Grocery: Schedule Management
                 </h1>
-                <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
+                <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
                   Manage schedules, access department resources, collaborate with team members, and streamline workplace
                   operations.
                 </p>
@@ -78,7 +80,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Work Scheduling</h3>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Create and manage work schedules with an intuitive interface for your entire department.
                   </p>
                 </div>
@@ -89,7 +91,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Team Management</h3>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Access employee profiles, department resources, and team collaboration tools in one place.
                   </p>
                 </div>
@@ -114,7 +116,7 @@ export default function Home() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Department Resources</h3>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Access important documents, announcements, and department policies from anywhere.
                   </p>
                 </div>
@@ -123,14 +125,14 @@ export default function Home() {
           </div>
         </section>
       </main>
-      <footer className="border-t bg-gray-100">
+      <footer className="border-t bg-muted">
         <div className="container flex flex-col gap-2 py-6 px-4 md:flex-row md:items-center md:gap-4 md:px-6">
-          <p className="text-xs text-gray-500 md:text-sm">© 2024 WorkScheduler. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground md:text-sm">© 2024 WorkScheduler. All rights reserved.</p>
           <nav className="flex gap-4 md:ml-auto md:gap-6">
-            <Link href="#" className="text-xs text-gray-500 hover:underline underline-offset-4 md:text-sm">
+            <Link href="#" className="text-xs text-muted-foreground hover:underline underline-offset-4 md:text-sm">
               Terms of Service
             </Link>
-            <Link href="#" className="text-xs text-gray-500 hover:underline underline-offset-4 md:text-sm">
+            <Link href="#" className="text-xs text-muted-foreground hover:underline underline-offset-4 md:text-sm">
               Privacy
             </Link>
           </nav>
