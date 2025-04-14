@@ -264,6 +264,19 @@ export default function EditEmployeePage() {
     setIsLoading(false)
   }, [router, employeeId])
 
+  useEffect(() => {
+    // Try to load employees from localStorage
+    try {
+      const savedEmployees = localStorage.getItem("department-hub-employees")
+      if (!savedEmployees) {
+        // If no saved employees, save our default data
+        localStorage.setItem("department-hub-employees", JSON.stringify(ALL_EMPLOYEES))
+      }
+    } catch (error) {
+      console.error("Error handling employees data:", error)
+    }
+  }, [])
+
   const handleInputChange = (field: keyof Employee, value: string) => {
     if (employeeData) {
       setEmployeeData({
@@ -276,15 +289,31 @@ export default function EditEmployeePage() {
   const handleSave = () => {
     setIsSaving(true)
 
-    // Simulate saving to database
-    setTimeout(() => {
-      toast({
-        title: "Profile Updated",
-        description: "The employee profile has been updated successfully.",
-      })
-      setIsSaving(false)
-      router.push(`/employees/${employeeId}`)
-    }, 1000)
+    // Get current employees from localStorage or use our default data
+    let allEmployees = [...ALL_EMPLOYEES]
+    try {
+      const savedEmployees = localStorage.getItem("department-hub-employees")
+      if (savedEmployees) {
+        allEmployees = JSON.parse(savedEmployees)
+      }
+    } catch (error) {
+      console.error("Error loading employees:", error)
+    }
+
+    // Update the employee in the array
+    const updatedEmployees = allEmployees.map((emp) => (emp.id === employeeData?.id ? employeeData : emp))
+
+    // Save back to localStorage
+    localStorage.setItem("department-hub-employees", JSON.stringify(updatedEmployees))
+
+    // Show success message
+    toast({
+      title: "Profile Updated",
+      description: "The employee profile has been updated successfully.",
+    })
+
+    setIsSaving(false)
+    router.push(`/employees/${employeeId}`)
   }
 
   if (isLoading) {

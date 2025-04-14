@@ -238,8 +238,19 @@ export default function EmployeeProfilePage() {
     setUserRole(role)
     setUserEmail(email)
 
+    // Try to load employees from localStorage
+    let employeesData = ALL_EMPLOYEES
+    try {
+      const savedEmployees = localStorage.getItem("department-hub-employees")
+      if (savedEmployees) {
+        employeesData = JSON.parse(savedEmployees)
+      }
+    } catch (error) {
+      console.error("Error loading employees:", error)
+    }
+
     // Find the employee by ID
-    const foundEmployee = ALL_EMPLOYEES.find((emp) => emp.id === employeeId)
+    const foundEmployee = employeesData.find((emp) => emp.id === employeeId)
     if (foundEmployee) {
       setEmployee(foundEmployee)
     } else {

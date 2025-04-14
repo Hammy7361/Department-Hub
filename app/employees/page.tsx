@@ -18,6 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
+import React from "react"
 
 // Define our employee data structure
 interface Employee {
@@ -173,6 +174,8 @@ const OTHER_EMPLOYEES: Employee[] = [
   },
 ]
 
+const ALL_EMPLOYEES = [...MEAT_MARKET_EMPLOYEES, ...OTHER_EMPLOYEES]
+
 export default function EmployeesPage() {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -194,21 +197,46 @@ export default function EmployeesPage() {
     const email = localStorage.getItem("userEmail")
     setUserRole(role)
     setUserEmail(email)
+
+    // Initialize employees data in localStorage if it doesn't exist
+    try {
+      const savedEmployees = localStorage.getItem("department-hub-employees")
+      if (!savedEmployees) {
+        localStorage.setItem("department-hub-employees", JSON.stringify(ALL_EMPLOYEES))
+      }
+    } catch (error) {
+      console.error("Error handling employees data:", error)
+    }
+
     setIsLoading(false)
   }, [router])
 
   // Apply filters to employee data
-  const filteredEmployees = [...MEAT_MARKET_EMPLOYEES, ...OTHER_EMPLOYEES].filter((employee) => {
-    const matchesSearch =
-      employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      employee.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (employee.position && employee.position.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredEmployees = React.useMemo(() => {
+    let employeesData = ALL_EMPLOYEES
 
-    const matchesDepartment = departmentFilter === "all" || employee.department === departmentFilter
+    // Try to get employees from localStorage
+    try {
+      const savedEmployees = localStorage.getItem("department-hub-employees")
+      if (savedEmployees) {
+        employeesData = JSON.parse(savedEmployees)
+      }
+    } catch (error) {
+      console.error("Error loading employees:", error)
+    }
 
-    return matchesSearch && matchesDepartment
-  })
+    return employeesData.filter((employee) => {
+      const matchesSearch =
+        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        employee.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (employee.position && employee.position.toLowerCase().includes(searchQuery.toLowerCase()))
+
+      const matchesDepartment = departmentFilter === "all" || employee.department === departmentFilter
+
+      return matchesSearch && matchesDepartment
+    })
+  }, [searchQuery, departmentFilter])
 
   // Check if the current user is Roland
   const isRoland = userEmail === "rnisley7361@gmail.com"
