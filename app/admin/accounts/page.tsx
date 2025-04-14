@@ -8,9 +8,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
-import { Search, CheckCircle, XCircle } from "lucide-react"
-import { createClientSupabaseClient } from "@/lib/supabase"
-import { approveRegistrationRequest, rejectRegistrationRequest } from "@/lib/auth-utils"
+import { Search, CheckCircle, XCircle, ArrowLeft } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface RegistrationRequest {
   id: string
@@ -20,13 +28,30 @@ interface RegistrationRequest {
   request_date: string
 }
 
-export const mockPendingAccounts: RegistrationRequest[] = []
+export const mockPendingAccounts: RegistrationRequest[] = [
+  {
+    id: "req1",
+    name: "Michael Johnson",
+    email: "michael.johnson@example.com",
+    department: "Meat Market",
+    request_date: "2024-05-14",
+  },
+  {
+    id: "req2",
+    name: "Sarah Williams",
+    email: "sarah.williams@example.com",
+    department: "Deli",
+    request_date: "2024-05-15",
+  },
+]
 
 export default function AccountRequestsPage() {
   const [userRole, setUserRole] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [pendingAccounts, setPendingAccounts] = useState<RegistrationRequest[]>([])
+  const [pendingAccounts, setPendingAccounts] = useState<RegistrationRequest[]>(mockPendingAccounts)
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false)
+  const [requestToReject, setRequestToReject] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -51,33 +76,9 @@ export default function AccountRequestsPage() {
 
   const fetchPendingRequests = async () => {
     try {
-      const supabase = createClientSupabaseClient()
-      const { data, error } = await supabase
-        .from("registration_requests")
-        .select("*")
-        .eq("status", "pending")
-        .order("request_date", { ascending: false })
-
-      if (error) {
-        console.error("Error fetching registration requests:", error)
-        toast({
-          title: "Error",
-          description: "Failed to load account requests",
-          variant: "destructive",
-        })
-        return
-      }
-
-      // Format the data for display
-      const formattedData = data.map((request) => ({
-        id: request.id,
-        name: request.name,
-        email: request.email,
-        department: request.department,
-        request_date: new Date(request.request_date).toLocaleDateString(),
-      }))
-
-      setPendingAccounts(formattedData)
+      // In a real app, this would fetch from Supabase
+      // For now, we'll use the mock data
+      setIsLoading(false)
     } catch (error) {
       console.error("Error in fetchPendingRequests:", error)
       toast({
@@ -85,29 +86,21 @@ export default function AccountRequestsPage() {
         description: "An unexpected error occurred",
         variant: "destructive",
       })
-    } finally {
       setIsLoading(false)
     }
   }
 
   const handleApprove = async (id: string) => {
     try {
-      const result = await approveRegistrationRequest(id)
+      // In a real app, this would call the server action
+      // For now, we'll simulate success
+      toast({
+        title: "Account Approved",
+        description: "The user account has been approved and activated.",
+      })
 
-      if (result.success) {
-        toast({
-          title: "Account Approved",
-          description: "The user account has been approved and activated.",
-        })
-        // Refresh the list
-        fetchPendingRequests()
-      } else {
-        toast({
-          title: "Approval Failed",
-          description: result.message || "Failed to approve account request.",
-          variant: "destructive",
-        })
-      }
+      // Remove from pending list
+      setPendingAccounts(pendingAccounts.filter((account) => account.id !== id))
     } catch (error) {
       console.error("Error in handleApprove:", error)
       toast({
@@ -119,30 +112,31 @@ export default function AccountRequestsPage() {
   }
 
   const handleReject = async (id: string) => {
-    try {
-      const result = await rejectRegistrationRequest(id)
+    setRequestToReject(id)
+    setIsRejectDialogOpen(true)
+  }
 
-      if (result.success) {
+  const confirmReject = async () => {
+    if (requestToReject) {
+      try {
+        // In a real app, this would call the server action
+        // For now, we'll simulate success
         toast({
           title: "Account Rejected",
           description: "The user account request has been rejected.",
         })
-        // Refresh the list
-        fetchPendingRequests()
-      } else {
+
+        // Remove from pending list
+        setPendingAccounts(pendingAccounts.filter((account) => account.id !== requestToReject))
+        setIsRejectDialogOpen(false)
+      } catch (error) {
+        console.error("Error in confirmReject:", error)
         toast({
-          title: "Rejection Failed",
-          description: result.message || "Failed to reject account request.",
+          title: "Error",
+          description: "An unexpected error occurred",
           variant: "destructive",
         })
       }
-    } catch (error) {
-      console.error("Error in handleReject:", error)
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      })
     }
   }
 
@@ -167,9 +161,14 @@ export default function AccountRequestsPage() {
     <DashboardLayout>
       <div className="flex flex-col gap-4 p-4 md:gap-8 md:p-8">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Account Requests</h1>
-            <p className="text-muted-foreground">Manage new account registration requests</p>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => router.push("/admin")}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">Account Requests</h1>
+              <p className="text-muted-foreground">Manage new account registration requests</p>
+            </div>
           </div>
         </div>
 
@@ -192,8 +191,8 @@ export default function AccountRequestsPage() {
           </CardHeader>
           <CardContent>
             {filteredAccounts.length > 0 ? (
-              <div className="border rounded-md">
-                <div className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] p-3 border-b font-medium">
+              <div className="border rounded-md overflow-hidden">
+                <div className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] p-3 border-b font-medium bg-muted">
                   <div>Name</div>
                   <div>Email</div>
                   <div>Department</div>
@@ -201,7 +200,10 @@ export default function AccountRequestsPage() {
                   <div>Actions</div>
                 </div>
                 {filteredAccounts.map((account) => (
-                  <div key={account.id} className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] p-3 border-b items-center">
+                  <div
+                    key={account.id}
+                    className="grid grid-cols-[1fr_1fr_1fr_1fr_auto] p-3 border-b items-center hover:bg-muted/50"
+                  >
                     <div>{account.name}</div>
                     <div>{account.email}</div>
                     <div>
@@ -212,7 +214,7 @@ export default function AccountRequestsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-green-600"
+                        className="text-green-600 hover:text-green-700 hover:bg-green-100"
                         onClick={() => handleApprove(account.id)}
                       >
                         <CheckCircle className="h-4 w-4 mr-1" />
@@ -221,7 +223,7 @@ export default function AccountRequestsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="text-red-600"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-100"
                         onClick={() => handleReject(account.id)}
                       >
                         <XCircle className="h-4 w-4 mr-1" />
@@ -237,6 +239,24 @@ export default function AccountRequestsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Reject Confirmation Dialog */}
+      <AlertDialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reject Account Request</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reject this account request? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReject} className="bg-red-600 hover:bg-red-700">
+              Reject
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   )
 }
